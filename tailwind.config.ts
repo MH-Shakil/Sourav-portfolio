@@ -15,6 +15,7 @@ const config: Config = {
         "primary-800": "var(--color-primary-800)",
         "primary-500": "var(--color-primary-500)",
         "blue-500": "var(--color-blue-500)",
+        "primary-1000": "var(--color-primary-1000)",
       },
       fontFamily: {
         "ibm-plex": ["var(--font-ibm-plex-sans)", "sans-serif"],
