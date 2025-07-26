@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useCallback } from "react";
 import {
   motion,
-  AnimatePresence,
+  MotionValue,
   useScroll,
   useSpring,
   useTransform,
@@ -36,8 +35,8 @@ const ParallaxHeading = ({
   designingX,
   growthX,
 }: {
-  designingX: any;
-  growthX: any;
+  designingX: MotionValue<number>;
+  growthX: MotionValue<number>;
 }) => (
   <div className="mb-16 overflow-hidden">
     <h1 className="text-6xl md:text-[192px] leading-[192px] font-bold text-primary-800 uppercase">
