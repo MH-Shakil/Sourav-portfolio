@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
-import { motion, useScroll, useSpring, useTransform } from "motion/react";
+import { motion, useMotionValue, useSpring } from "motion/react";
 import { Header } from "@/components/Features/header";
 import { Footer } from "@/components/Features/footer";
 
@@ -12,54 +12,69 @@ interface LayoutWrapperProps {
 const LayoutWrapper = ({ children }: LayoutWrapperProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [contentHeight, setContentHeight] = useState(0);
-  const [windowHeight, setWindowHeight] = useState(0);
+  const scrollY = useMotionValue(0);
 
-  const { scrollYProgress } = useScroll();
-
-  const smoothProgress = useSpring(scrollYProgress, {
-    mass: 0.1,
-    stiffness: 100,
-    damping: 20,
+  const smoothY = useSpring(scrollY, {
+    mass: 1,
+    stiffness: 50,
+    damping: 25,
     restDelta: 0.001,
   });
 
-  const y = useTransform(smoothProgress, (value) => {
-    return value * -(contentHeight - windowHeight);
-  });
-
   useEffect(() => {
-    const updateHeights = () => {
+    const updateContentHeight = () => {
       if (contentRef.current) {
-        setContentHeight(contentRef.current.scrollHeight);
+        const height = contentRef.current.scrollHeight;
+        setContentHeight(height);
+        document.body.style.height = `${height}px`;
       }
-      setWindowHeight(window.innerHeight);
     };
 
-    updateHeights();
-    window.addEventListener("resize", updateHeights);
+    updateContentHeight();
 
-    const timer = setTimeout(updateHeights, 100);
+    const handleScroll = () => {
+      scrollY.set(-window.scrollY);
+    };
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const currentScroll = -scrollY.get();
+      const maxScroll = contentHeight - window.innerHeight;
+      const newScroll = Math.max(
+        0,
+        Math.min(maxScroll, currentScroll + e.deltaY * 3)
+      );
+      window.scrollTo(0, newScroll);
+    };
+
+    // Initial scroll position
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("resize", updateContentHeight);
+
+    const timer = setTimeout(updateContentHeight, 100);
 
     return () => {
-      window.removeEventListener("resize", updateHeights);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("resize", updateContentHeight);
       clearTimeout(timer);
+      document.body.style.height = "";
     };
-  }, [children]);
+  }, [children, contentHeight, scrollY]);
 
   return (
-    <>
-      <div style={{ height: contentHeight }} />
-
-      <motion.div
-        className="w-screen fixed top-0 flex flex-col min-h-screen bg-background"
-        ref={contentRef}
-        style={{ y }}
-      >
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-      </motion.div>
-    </>
+    <motion.div
+      className="w-screen fixed top-0 flex flex-col min-h-screen bg-background"
+      ref={contentRef}
+      style={{ y: smoothY }}
+    >
+      <Header />
+      <main className="flex-1">{children}</main>
+      <Footer />
+    </motion.div>
   );
 };
 

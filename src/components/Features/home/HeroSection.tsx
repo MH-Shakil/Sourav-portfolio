@@ -82,11 +82,11 @@ const HeroSection = () => {
   const { scrollYProgress } = useScroll();
 
   const smoothProgress = useSpring(scrollYProgress, SPRING_CONFIG);
-  const designingX = useTransform(smoothProgress, [0, 1], [0, -100]);
-  const growthX = useTransform(smoothProgress, [0, 1], [0, 100]);
+  const designingX = useTransform(smoothProgress, [0, 0.3], [0, -200]);
+  const growthX = useTransform(smoothProgress, [0, 0.3], [0, 200]);
 
   return (
-    <div className="text-center mb-8">
+    <div className="text-center mb-8 container">
       <p className="text-base text-primary-500 uppercase mb-8">
         Since 2019 - Present
       </p>
